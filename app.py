@@ -178,6 +178,86 @@ def listar_patrimonios():
     conn.close()
     return render_template('listar.html', patrimonios=patrimonios, valor_total=valor_total, total_patrimonios=total_patrimonios)
 
+@app.route('/colaboradores')
+def colaboradores_page():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT cpf, colaborador FROM colaboradores ORDER BY colaborador")
+    colaboradores = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('colaboradores.html', colaboradores=colaboradores)
+
+@app.route('/cadastrar_colaborador', methods=['POST'])
+def cadastrar_colaborador():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    cpf = (request.form.get('cpf') or '').strip()
+    nome = (request.form.get('colaborador') or '').strip()
+    if not cpf or not nome:
+        return "Erro: 'cpf' e 'colaborador' são obrigatórios.", 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT COUNT(1) FROM colaboradores WHERE cpf = %s", (cpf,))
+        if cursor.fetchone()[0] > 0:
+            cursor.close()
+            conn.close()
+            return f"Erro: CPF {cpf} já cadastrado.", 400
+
+        cursor.execute(
+            "INSERT INTO colaboradores (cpf, colaborador) VALUES (%s, %s)",
+            (cpf, nome),
+        )
+        conn.commit()
+        # atualiza cache em segundo plano
+        carregar_cache_async()
+    finally:
+        try:
+            cursor.close()
+        except Exception:
+            pass
+        try:
+            conn.close()
+        except Exception:
+            pass
+    return redirect(url_for('colaboradores_page'))
+
+@app.route('/editar_colaborador', methods=['POST'])
+def editar_colaborador():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    cpf = (request.form.get('cpf') or '').strip()
+    nome = (request.form.get('colaborador') or '').strip()
+    if not cpf or not nome:
+        return "Erro: 'cpf' e 'colaborador' são obrigatórios.", 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Primeiro verifica existência para evitar falso negativo quando não há mudança de valor
+        cursor.execute("SELECT 1 FROM colaboradores WHERE cpf = %s", (cpf,))
+        exists = cursor.fetchone()
+        if not exists:
+            return f"Erro: CPF {cpf} não encontrado.", 404
+
+        cursor.execute("UPDATE colaboradores SET colaborador = %s WHERE cpf = %s", (nome, cpf))
+        conn.commit()
+        carregar_cache_async()
+    finally:
+        try:
+            cursor.close()
+        except Exception:
+            pass
+        try:
+            conn.close()
+        except Exception:
+            pass
+    return redirect(url_for('colaboradores_page'))
+
 @app.route('/cadastrar', methods=['POST'])
 def cadastrar():
     nome = request.form['nome']
