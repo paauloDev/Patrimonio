@@ -11,6 +11,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+        <!-- Ícone fixo de voltar no topo (padrão global) -->
+        <a class="back-fixed-top" href="/" aria-label="Voltar" style="position: fixed; top: 16px; left: 16px; z-index: 2000; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.15); background: rgba(30, 36, 54, 0.8); color: #fff; text-decoration: none;">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
     <div class="container">
         <header>
             <h1>Lista de Patrimônios</h1>
@@ -28,11 +34,13 @@
             <input type="text" id="filter-colaborador" class="autocomplete-colaborador">
             <button id="apply-filters">Aplicar Filtros</button>
         </div>
-        <table>
+        <div class="table-wrap">
+            <table>
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Nome</th>
+                    <th>Empresa</th>
                     <th>Etiqueta</th>
                     <th>Colaborador</th>
                     <th>Valor (R$)</th>
@@ -40,30 +48,43 @@
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody id="patrimonios-tbody">
+            </table>
+            <div class="table-body">
+                <table>
+                    <tbody id="patrimonios-tbody">
                 {% for patrimonio in patrimonios %}
                 <tr class="patrimonio-row" data-id="{{ patrimonio[0] }}">
                     <td>{{ patrimonio[0] }}</td>
-                        <!-- Ícone fixo de voltar no topo (padrão global) -->
-                        <a class="back-fixed-top" href="/" aria-label="Voltar" style="position: fixed; top: 16px; left: 16px; z-index: 2000; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.15); background: rgba(30, 36, 54, 0.8); color: #fff; text-decoration: none;">
-                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-                            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                          </svg>
-                        </a>
                     <td>{{ patrimonio[1] }}</td>
+                    <td>{{ patrimonio[10] }}</td>
                     <td>{{ patrimonio[4] }}</td>
                     <td>{{ patrimonio[2] }}</td>
                     <td>{{ patrimonio[7] }}</td>
                     <td>{{ patrimonio[8] }}</td>
-                    <td><button class="btn edit-btn">Editar</button></td>
+                    <td>
+                        <div class="action-group">
+                            <button class="action-btn btn-edit edit-btn" type="button">Editar</button>
+                            <form method="POST" action="{{ url_for('excluir_patrimonio') }}" onsubmit="return confirm('Tem certeza que deseja excluir este patrimônio? Esta ação não pode ser desfeita.');">
+                                <input type="hidden" name="id" value="{{ patrimonio[0] }}">
+                                <button class="action-btn btn-delete" type="submit">Excluir</button>
+                            </form>
+                        </div>
+                    </td>
                 </tr>
                 <tr class="patrimonio-details" id="details-{{ patrimonio[0] }}" style="display: none;">
-                    <td colspan="7">
+                    <td colspan="8">
                         <form class="edit-form">
                             <div class="edit-fields">
                                 <div class="edit-field">
                                     <label>Nome</label>
                                     <input type="text" name="nome" value="{{ patrimonio[1] }}">
+                                </div>
+                                <div class="edit-field">
+                                    <label>Empresa</label>
+                                    <select name="empresa" class="dropdown">
+                                        <option value="TRACK" {% if patrimonio[10] == 'TRACK' %}selected{% endif %}>TRACK</option>
+                                        <option value="RAPTOR" {% if patrimonio[10] == 'RAPTOR' %}selected{% endif %}>RAPTOR</option>
+                                    </select>
                                 </div>
                                 <div class="edit-field">
                                     <label>Etiqueta</label>
@@ -99,7 +120,12 @@
                                     <textarea name="observacao">{{ patrimonio[8] }}</textarea>
                                 </div>
                                 <div class="edit-field">
-                                    <button type="button" class="btn open-folder-btn" onclick="window.open('{{ patrimonio[9] }}', '_blank')">
+                                    <button
+                                        type="button"
+                                        class="btn open-folder-btn"
+                                        data-url="{{ patrimonio[9] }}"
+                                        {% if not patrimonio[9] %}disabled title="Sem link de anexos (Google Drive) para este patrimônio."{% endif %}
+                                    >
                                         <i class="fas fa-paperclip" style="font-size: 24px; color: #fff;"></i> Anexos
                                     </button>
                                 </div>
@@ -148,16 +174,15 @@
                         alert('Erro ao atualizar informações.');
                     }
                 });
-                        <!-- Removido botão de voltar para usar ícone fixo -->
-                var form = $(this).closest('.edit-form');
-                var detailsRow = form.closest('.patrimonio-details');
-                detailsRow.hide();
-                $('.filters, .patrimonio-row').show();
             });
 
             $('.open-folder-btn').on('click', function() {
                 var url = $(this).data('url');
-                window.open(url, '_blank');
+                if (!url || typeof url !== 'string' || url.trim() === '') {
+                    alert('Este patrimônio não possui link de anexos (Google Drive).');
+                    return;
+                }
+                window.open(url, '_blank', 'noopener');
             });
 
             $('#apply-filters').on('click', function() {
@@ -168,8 +193,8 @@
                 $('#patrimonios-tbody tr.patrimonio-row').each(function() {
                     var row = $(this);
                     var rowNome = row.find('td:eq(1)').text().toLowerCase();
-                    var rowEtiqueta = row.find('td:eq(2)').text().toLowerCase();
-                    var rowColaborador = row.find('td:eq(3)').text().toLowerCase();
+                    var rowEtiqueta = row.find('td:eq(3)').text().toLowerCase();
+                    var rowColaborador = row.find('td:eq(4)').text().toLowerCase();
 
                     if ((nome === "" || rowNome.includes(nome)) &&
                         (etiqueta === "" || rowEtiqueta.includes(etiqueta)) &&

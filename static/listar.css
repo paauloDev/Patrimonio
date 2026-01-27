@@ -23,20 +23,18 @@ html, body {
 
 /* Adicionando o blur externo, caixa externa e borda acinzentada */
 .container {
-    width: 90%;
+    width: 92%;
     max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    background: transparent; /* Fundo totalmente transparente */
-    border-radius: 12px;
-    backdrop-filter: blur(10px); /* Blur externo */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Caixa externa com sombra */
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Borda acinzentada */
+    margin: 28px auto;
+    padding: 28px 32px;
+    background: linear-gradient(180deg, rgba(18,18,30,0.55), rgba(20,16,30,0.40));
+    border-radius: 14px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,255,255,0.04);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    max-height: 80vh; /* Limitar a altura máxima do container */
-    overflow-y: auto; /* Habilitar a rolagem vertical */
+    gap: 12px;
 }
 
 /* Tabela com fundo transparente */
@@ -47,40 +45,37 @@ table {
 /* Título estilizado */
 header {
     width: 100%;
-    text-align: center;
-    margin-bottom: 20px;
-    position: relative; /* Adicionado para posicionamento absoluto do resumo */
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom: 8px;
 }
 
 .summary {
-    position: absolute;
-    top: 0;
-    right: 0;
     text-align: right;
-    padding: 10px;
-    border-radius: 8px;
-    color: white;
+    color: rgba(255,255,255,0.9);
+    font-size: 13px;
 }
 
 /* Estiliza o título */
 h1 {
     color: white; /* Deixa o texto branco */
     font-family: 'Oswald', sans-serif; /* Usa a fonte Oswald */
-    font-weight: 300; /* Fonte mais fina */
-    margin-bottom: 40px; /* Aumenta o espaço abaixo do título */
-    font-size: 30px; /* Tamanho do texto */
+    font-weight: 400;
+    margin: 0;
+    font-size: 26px;
+    letter-spacing: 1px;
 }
 
 /* Estilização dos filtros */
 .filters {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
     width: 100%;
-    margin-bottom: 20px;
-    padding: 10px;
-    background: transparent; /* Fundo transparente */
-    border-radius: 8px;
+    margin-top: 6px;
 }
 
 .filters label {
@@ -88,12 +83,13 @@ h1 {
 }
 
 .filters input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background: transparent; /* Fundo transparente */
-    color: white; /* Garantir que o texto nos inputs seja branco */
-    transition: 0.3s ease;
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    color: white;
+    min-width: 160px;
+    transition: 0.18s ease;
 }
 
 .filters input:focus {
@@ -102,14 +98,14 @@ h1 {
 }
 
 .filters button {
-    padding: 10px 20px;
-    background: #007bff;
+    padding: 10px 18px;
+    background: linear-gradient(90deg,#3a02d6,#6b21d8);
     color: #fff;
     border: none;
-    border-radius: 6px;
+    border-radius: 12px;
     cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s;
+    font-weight: 700;
+    letter-spacing: 0.6px;
 }
 
 .filters button:hover {
@@ -117,70 +113,64 @@ h1 {
 }
 
 /* Estilização da tabela */
+/* Tabela em bloco com área de rolagem */
+.table-wrap { width:100%; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.03); }
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
-    background: transparent; /* Fundo transparente */
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: none; /* Remove a sombra */
+    margin: 0;
+    background: transparent;
 }
+
+.table-body {
+    display:block;
+    max-height: 56vh;
+    overflow:auto;
+}
+
+.table-body table { width:100%; }
 
 th, td {
-    padding: 12px 15px;
+    padding: 14px 16px;
     text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Borda semitransparente */
-    background: transparent; /* Fundo transparente */
-    color: white; /* Cor das letras para branco */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    background: transparent;
+    color: rgba(255,255,255,0.95);
+    vertical-align: middle;
 }
 
-tr:nth-child(even) {
-    background-color: transparent; /* Fundo transparente */
-}
+tr.patrimonio-row { background: transparent; }
 
 /* Efeito hover nas linhas da tabela */
-tr:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* Fundo semitransparente ao passar o mouse */
-    transition: background 0.3s ease;
+tr.patrimonio-row:hover {
+    background-color: rgba(255,255,255,0.02);
 }
 
 /* Botões de ação */
-.edit-btn, .delete-btn {
-    padding: 6px 12px;
+.action-group { display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
+.action-group form { margin:0; }
+.action-btn {
+    padding: 8px 14px;
+    border-radius: 20px;
     border: none;
-    border-radius: 5px;
     cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.6px;
+    min-width: 84px; /* garante largura consistente */
+    height: 36px; /* garante altura consistente */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
-
-.edit-btn {
-    background: #28a745;
-    color: #fff;
-}
-
-.edit-btn:hover {
-    background: #218838;
-}
-
-.delete-btn {
-    background: #dc3545;
-    color: white;
-}
-
-.delete-btn:hover {
-    background: #c82333;
-}
+.btn-edit { background: linear-gradient(90deg,#6b21d8,#3a02d6); color: #fff; box-shadow: 0 6px 16px rgba(58,2,214,0.15); }
+.btn-edit:hover { transform: translateY(-3px); }
+.btn-delete { background: transparent; color: #ff6b6b; border: 1px solid rgba(255,107,107,0.12); padding: 0 14px; }
+.btn-delete:hover { background: rgba(255,107,107,0.04); }
 
 /* Melhorias no formulário de edição */
-.patrimonio-details {
-    background: transparent; /* Fundo totalmente transparente */
-    border-radius: 10px;
-    box-shadow: none; /* Remove a sombra */
-    padding: 15px;
-    margin-top: 10px;
-}
+.patrimonio-details { background: rgba(255,255,255,0.02); border-radius:10px; padding:14px; margin:10px 0; }
 
 .patrimonio-details table {
     width: 100%;
@@ -331,10 +321,10 @@ tr:hover {
 }
 
 .edit-field {
-    flex: 1 1 45%; /* Faz com que as caixas de texto fiquem dispostas horizontalmente */
+    flex: 1 1 48%;
     display: flex;
     flex-direction: column;
-    width: calc(50% - 10px); /* Garante que as caixas ocupem metade da largura */
+    min-width: 220px;
 }
 
 /* Garantindo a cor branca dentro de inputs e textareas */
@@ -360,27 +350,9 @@ tr:hover {
 
 /* Estilos para os botões de ação */
 .btn {
-    flex: 1;
-    max-width: 250px;
-    padding: 12px;
-    background: linear-gradient(135deg, #4502f8, #3a02d6);
-    color: #fff;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    font-size: 16px;
-    font-family: "Roboto", monospace;
-    font-weight: 600;
-    text-transform: uppercase;
-    transition: background 0.3s, transform 0.2s;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.btn:hover {
-    background: linear-gradient(135deg, #3a02d6, #2a019b);
-    transform: translateY(-3px);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 700;
 }
 
 .btn:active {

@@ -960,7 +960,7 @@ if __name__ == "__main__":
         criar_tabela_veiculo()
         criar_tabela_aluno()
         hoje = datetime.now()
-        dia_consulta = hoje
+        dia_consulta = hoje - timedelta(days=4)
         print(f"Consultando e alimentando banco para o dia: {dia_consulta.strftime('%d/%m/%Y')}")
         consultar_api_escola(dia_consulta, token=token_unico)
         consultar_api_veiculo(dia_consulta, token=token_unico)
