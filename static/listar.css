@@ -52,10 +52,47 @@ header {
     margin-bottom: 8px;
 }
 
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.header-links {
+    display: flex;
+    gap: 10px;
+}
+
+.header-link {
+    color: rgba(255,255,255,0.9);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.03);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.header-link:hover {
+    background: rgba(255,255,255,0.06);
+}
+
 .summary {
     text-align: right;
     color: rgba(255,255,255,0.9);
     font-size: 13px;
+}
+
+.summary-mini {
+    font-size: 12px;
+    opacity: 0.95;
 }
 
 /* Estiliza o título */
@@ -163,11 +200,40 @@ tr.patrimonio-row:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    line-height: 1;
+    white-space: nowrap;
 }
 .btn-edit { background: linear-gradient(90deg,#6b21d8,#3a02d6); color: #fff; box-shadow: 0 6px 16px rgba(58,2,214,0.15); }
 .btn-edit:hover { transform: translateY(-3px); }
 .btn-delete { background: transparent; color: #ff6b6b; border: 1px solid rgba(255,107,107,0.12); padding: 0 14px; }
 .btn-delete:hover { background: rgba(255,107,107,0.04); }
+
+.btn-stock {
+    background: transparent;
+    color: rgba(255,255,255,0.92);
+    border: 1px solid rgba(255,255,255,0.14);
+}
+
+.btn-stock:hover {
+    background: rgba(255,255,255,0.06);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+}
+
+.badge-estoque {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.95);
+}
 
 /* Melhorias no formulário de edição */
 .patrimonio-details { background: rgba(255,255,255,0.02); border-radius:10px; padding:14px; margin:10px 0; }

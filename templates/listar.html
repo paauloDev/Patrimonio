@@ -19,10 +19,28 @@
         </a>
     <div class="container">
         <header>
-            <h1>Lista de Patrimônios</h1>
+            <div class="header-left">
+                {% if somente_estoque %}
+                    <h1>Estoque de Patrimônios</h1>
+                {% else %}
+                    <h1>Lista de Patrimônios</h1>
+                {% endif %}
+                <div class="header-links">
+                    {% if somente_estoque %}
+                        <a class="header-link" href="{{ url_for('listar_patrimonios') }}">Ver todos</a>
+                    {% else %}
+                        <a class="header-link" href="{{ url_for('listar_patrimonios', estoque=1) }}">Ver estoque</a>
+                    {% endif %}
+                </div>
+            </div>
             <div class="summary">
                 <p>Total de Patrimônios: {{ total_patrimonios }}</p>
                 <p>Valor Total: R$ {{ valor_total }}</p>
+                <p class="summary-mini">
+                    Em estoque: {{ total_estoque }} (R$ {{ valor_total_estoque }})
+                    &nbsp;|&nbsp;
+                    Alocados: {{ total_alocados }} (R$ {{ valor_total_alocados }})
+                </p>
             </div>
         </header>
         <div class="filters">
@@ -58,12 +76,28 @@
                     <td>{{ patrimonio[1] }}</td>
                     <td>{{ patrimonio[10] }}</td>
                     <td>{{ patrimonio[4] }}</td>
-                    <td>{{ patrimonio[2] }}</td>
+                    <td>
+                        {% set c1 = (patrimonio[2] or '')|trim %}
+                        {% set c2 = (patrimonio[3] or '')|trim %}
+                        {% if c1 == '' and c2 == '' %}
+                            <span class="badge badge-estoque">ESTOQUE</span>
+                        {% else %}
+                            {{ patrimonio[2] }}
+                        {% endif %}
+                    </td>
                     <td>{{ patrimonio[7] }}</td>
                     <td>{{ patrimonio[8] }}</td>
                     <td>
                         <div class="action-group">
                             <button class="action-btn btn-edit edit-btn" type="button">Editar</button>
+                            {% set c1 = (patrimonio[2] or '')|trim %}
+                            {% set c2 = (patrimonio[3] or '')|trim %}
+                            {% if not (c1 == '' and c2 == '') %}
+                                <form method="POST" action="{{ url_for('devolver_estoque') }}" onsubmit="return confirm('Deseja devolver este patrimônio ao estoque? (Os colaboradores serão removidos)');">
+                                    <input type="hidden" name="id" value="{{ patrimonio[0] }}">
+                                    <button class="action-btn btn-stock" type="submit">Estoque</button>
+                                </form>
+                            {% endif %}
                             <form method="POST" action="{{ url_for('excluir_patrimonio') }}" onsubmit="return confirm('Tem certeza que deseja excluir este patrimônio? Esta ação não pode ser desfeita.');">
                                 <input type="hidden" name="id" value="{{ patrimonio[0] }}">
                                 <button class="action-btn btn-delete" type="submit">Excluir</button>

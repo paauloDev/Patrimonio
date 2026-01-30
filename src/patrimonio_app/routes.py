@@ -72,14 +72,48 @@ def register_routes(
 
     @app.get("/listar_patrimonios")
     def listar_patrimonios():
+        somente_estoque = (request.args.get("estoque") or "").strip().lower() in {"1", "true", "sim", "yes"}
         with db_connection(pool) as conn:
             cursor = conn.cursor()
             try:
-                cursor.execute("SELECT * FROM patrimonios")
+                if somente_estoque:
+                    cursor.execute(
+                        """
+                        SELECT *
+                        FROM patrimonios
+                        WHERE (colaborador IS NULL OR TRIM(colaborador) = '')
+                          AND (colaborador2 IS NULL OR TRIM(colaborador2) = '')
+                        """
+                    )
+                else:
+                    cursor.execute("SELECT * FROM patrimonios")
                 patrimonios = cursor.fetchall()
 
+                # Totais gerais
                 cursor.execute("SELECT SUM(valor) FROM patrimonios")
-                valor_total = cursor.fetchone()[0] or 0
+                valor_total_geral = cursor.fetchone()[0] or 0
+
+                # Totais de estoque
+                cursor.execute(
+                    """
+                    SELECT COUNT(1), COALESCE(SUM(valor), 0)
+                    FROM patrimonios
+                    WHERE (colaborador IS NULL OR TRIM(colaborador) = '')
+                      AND (colaborador2 IS NULL OR TRIM(colaborador2) = '')
+                    """
+                )
+                total_estoque, valor_total_estoque = cursor.fetchone()
+
+                # Totais alocados (qualquer colaborador preenchido)
+                cursor.execute(
+                    """
+                    SELECT COUNT(1), COALESCE(SUM(valor), 0)
+                    FROM patrimonios
+                    WHERE NOT ((colaborador IS NULL OR TRIM(colaborador) = '')
+                           AND (colaborador2 IS NULL OR TRIM(colaborador2) = ''))
+                    """
+                )
+                total_alocados, valor_total_alocados = cursor.fetchone()
             finally:
                 try:
                     cursor.close()
@@ -87,12 +121,24 @@ def register_routes(
                     pass
 
         total_patrimonios = len(patrimonios)
+        # Para a página de estoque, o “valor_total” mostrado deve ser o do recorte.
+        valor_total = valor_total_estoque if somente_estoque else valor_total_geral
         return render_template(
             "listar.html",
             patrimonios=patrimonios,
             valor_total=valor_total,
             total_patrimonios=total_patrimonios,
+            somente_estoque=somente_estoque,
+            total_estoque=total_estoque,
+            total_alocados=total_alocados,
+            valor_total_estoque=valor_total_estoque,
+            valor_total_alocados=valor_total_alocados,
         )
+
+    @app.get("/estoque")
+    def estoque():
+        # Mantém uma URL amigável para estoque, reutilizando a listagem.
+        return redirect(url_for("listar_patrimonios", estoque=1))
 
     @app.get("/colaboradores")
     def colaboradores_page():
@@ -296,6 +342,35 @@ def register_routes(
                     pass
 
         return "OK", 200
+
+    @app.post("/devolver_estoque")
+    def devolver_estoque():
+        """Remove colaboradores do patrimônio (volta para 'estoque') sem excluir o registro."""
+        patrimonio_id = (request.form.get("id") or "").strip()
+        if not patrimonio_id:
+            return "Erro: id é obrigatório.", 400
+
+        with db_connection(pool) as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("SELECT colaborador, colaborador2 FROM patrimonios WHERE id = %s", (patrimonio_id,))
+                row = cursor.fetchone()
+                if not row:
+                    return f"Erro: patrimônio id {patrimonio_id} não encontrado.", 404
+
+                # Mesmo que já esteja em estoque, a operação é idempotente.
+                cursor.execute(
+                    "UPDATE patrimonios SET colaborador = %s, colaborador2 = %s WHERE id = %s",
+                    ("", "", patrimonio_id),
+                )
+                conn.commit()
+            finally:
+                try:
+                    cursor.close()
+                except Exception:
+                    pass
+
+        return redirect(request.referrer or url_for("listar_patrimonios"))
 
     @app.post("/excluir_patrimonio")
     def excluir_patrimonio():
