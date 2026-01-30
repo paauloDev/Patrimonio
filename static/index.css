@@ -60,6 +60,10 @@ h1 {
     border: none; /* Remove a borda */
     color: white; /* Cor do texto branco */
     text-align: center;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer; /* Mostra a "mãozinha" ao passar o mouse */
     transition: background 0.3s, color 0.3s, transform 0.2s; /* Animações suaves */
     text-decoration: none; /* Remove o sublinhado */
